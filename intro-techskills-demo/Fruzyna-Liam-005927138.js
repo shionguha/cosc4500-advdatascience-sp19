@@ -2,7 +2,7 @@
  * Liam Fruzyna
  * COSC 4500
  * Intro Tech Skills Demo
- * https://github.com/shionguha/cosc4500-advdatascience-sp19/tree/master/intro-techskills-demo/Fruzyna-Liam-005927138.html
+ * https://mail929.github.io/cosc4500-advdatascience-sp19/intro-techskills-demo/Fruzyna-Liam-005927138.html
  */
 
 /**
