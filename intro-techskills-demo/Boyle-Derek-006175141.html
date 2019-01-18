@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COSC 4500 Intro Demo</title>
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
+    body {
+      padding: 0;
+      margin: 0;
+      font-family: 'Nunito', Arial, sans-serif;
+      color: #808080;
+    }
+
+    #header {
+      height: 75px;
+      padding: 0 40px;
+      background-color: #1D2F3F;
+      color: white;
+    }
+
+    .left {
+      float: left;
+      width: 50%;
+    }
+
+    .right {
+      float: left;
+      width: 50%;
+      text-align: right;
+    }
+
+    #stats {
+      padding: 10px 0 10px 50px;
+    }
+
+    #graph {
+      padding: 0 0 0 20px;
+      background-color: #F3F3F3;
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 0;
+      padding: 20px;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: 4px;
+    }
+
+    button {
+      background-color: #85CEBB;
+      border: none;
+      outline: none;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    tr {
+      border-bottom: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 4px;
+      font-size: 14px;
+    }
+
+    .canvas {
+      margin-top: 20px;
+    }
+
+    .axis {
+      font-size: 12px;
+    }
+
+    .axis-label {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-anchor: middle;
+    }
+
+    .plot {
+      fill-opacity: 1;
+      stroke: #27BEC9;
+      stroke-width: 6px;
+      stroke-opacity: .5;
+    }
+
+    div.tooltip {
+      position: absolute;
+      text-align: center;
+      width: 30px;
+      height: 15px;
+      padding: 2px;
+      font: 12px sans-serif;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .grid line {
+      stroke: #D3D3D3;
+      stroke-opacity: 0.7;
+      stroke-dasharray: 1;
+      shape-rendering: crispEdges;
+    }
+
+    .grid path {
+      stroke-width: 0;
+    }
+  </style>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+    function main () {
+      var ARRAY_SIZE = 10,
+          MAX_VALUE = 10,
+          MARGIN = {top: 20, right: 20, bottom: 50, left: 50},
+          WIDTH = 920 - MARGIN.left - MARGIN.right,
+          HEIGHT = 420 - MARGIN.top - MARGIN.bottom;
+
+      // remove previous table and graph
+      d3.select('#stats').selectAll('table').remove();
+      d3.select('#graph').selectAll('svg').remove();
+
+
+      //#1 - Create 2 arrays of random, count data within the domain (1-10). Sample size of each array should be 10.
+      var xVals = [],
+          yVals = [];
+
+      for (i = 0; i < ARRAY_SIZE; i++) {
+        xVals.push(Math.floor(Math.random() * 10) + 1);
+        yVals.push(Math.floor(Math.random() * 10) + 1);
+      }
+
+      //#2 - Calculate mean, median, mode, standard deviation of each array and print them on the html with formatting.
+      var headers = [
+        {key: 'axis', label: 'AXIS', width: '40'},
+        {key: 'mean', label: 'MEAN', width: '60'},
+        {key: 'median', label: 'MEDIAN', width: '60'},
+        {key: 'mode', label: 'MODE', width: '130'},
+        {key: 'stddev', label: 'STD DEV', width: '90'}
+      ];
+      var colAlign = ['center', 'right', 'right', 'right', 'right'];
+      var data = [
+        {
+          axis: 'X',
+          mean: meanOfArray(xVals).toFixed(1),
+          median: medianOfArray(xVals).toFixed(1),
+          mode: modeOfArray(xVals.slice()),
+          stddev: stdDevOfArray(xVals).toFixed(5)
+        },
+        {
+          axis: 'Y',
+          mean: meanOfArray(yVals).toFixed(1),
+          median: medianOfArray(yVals).toFixed(1),
+          mode: modeOfArray(yVals.slice()),
+          stddev: stdDevOfArray(yVals).toFixed(5)
+        }
+      ];
+
+      // create new table
+      var table = d3.select('#stats').append('table');
+      var thead = table.append('thead');
+      var tbody = table.append('tbody');
+
+      // table header
+      var thRows = thead.append('tr')
+                        .selectAll('th')
+                        .data(headers)
+                        .enter()
+                        .append('th')
+                        .text(function (d) {
+                          return d.label;
+                        })
+                        .attr('width', function (d) {
+                          return d.width;
+                        })
+                        .attr('align', function (d, i) {
+                          return colAlign[i];
+                        });
+
+      // table rows
+      var rows = tbody.selectAll('tr')
+                      .data(data)
+                      .enter()
+                      .append('tr');
+
+      // table cells
+      var cells = rows.selectAll('td')
+                      .data(function (row) {
+                        return headers.map(function (column) {
+                          return {column: column, value: row[column.key]};
+                        });
+                      })
+                      .enter()
+                      .append('td')
+                      .text(function (d) {
+                        return d.value;
+                      })
+                      .attr('align', function (d, i) {
+                        return colAlign[i];
+                      });
+
+      //#3 - Use these 2 arrays to define a x-axis and y-axis.
+      var plotData = xVals.map(function (val, i) {
+        return [val, yVals[i]]
+      });
+
+      var xScale = d3.scaleLinear()
+                     .domain([0, MAX_VALUE])
+                     .range([0, WIDTH]);
+
+      var yScale = d3.scaleLinear()
+                     .domain([0, MAX_VALUE])
+                     .range([HEIGHT, 0]);
+
+      //#4 - Build a svg-based scatterplot based on the random, count data generated in [1].
+      // base svg
+      var canvas = d3.select('#graph')
+                     .append('svg')
+                     .attr('width', WIDTH + MARGIN.left + MARGIN.right)
+                     .attr('height', HEIGHT  + MARGIN.top + MARGIN.bottom)
+                     .attr('class', 'canvas')
+                     .append('g')
+                     .attr("transform",
+                       "translate(" + MARGIN.left + "," + MARGIN.top + ")");
+
+      // x-axis
+      canvas.append("g")
+            .attr("transform", "translate(0," + HEIGHT + ")")
+            .attr('class', 'axis')
+            .call(d3.axisBottom(xScale));
+
+      // x-axis label
+      canvas.append("text")
+            .attr("transform",
+              "translate(" + (WIDTH/2) + " ," +
+              (HEIGHT + MARGIN.top + 20) + ")")
+            .attr("class", "axis-label")
+            .text("Random X Values");
+
+      // y-axis
+      canvas.append("g")
+            .attr('class', 'axis')
+            .call(d3.axisLeft(yScale));
+
+      // y-axis label
+      canvas.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - MARGIN.left)
+            .attr("x",0 - (HEIGHT / 2))
+            .attr("dy", "1em")
+            .attr("class", "axis-label")
+            .text("Random Y Values");
+
+
+      // y-axis grid lines
+      canvas.append("g")
+            .attr("class", "grid")
+            .call(d3.axisLeft(yScale)
+                    .tickSize(-WIDTH)
+                    .tickFormat("")
+            )
+
+      // draw plot points
+      canvas.selectAll('circle')
+            .data(plotData)
+            .enter()
+            .append('circle')
+            .attr('r', 6)
+            .attr('cx', function (d) {
+              return xScale(d[0]);
+            })
+            .attr('cy', function (d) {
+              return yScale(d[1]);
+            })
+            .attr('fill','#27BEC9')
+            .attr('class', 'plot')
+            .on("mouseover", function (d) {
+              div.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              div.html('[' + d[0] + ',' + d[1] + ']')
+                 .style("left", (d3.event.pageX) + "px")
+                 .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function (d) {
+              div.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+            });
+
+      //#5 - If I hover over any data point in said scatterplot, I should be able to see both data points i.e. 2,3 or 5,7 etc.
+      var div = d3.select('#graph')
+                  .append('div')
+                  .attr('class', 'tooltip');
+
+    }
+
+    function meanOfArray(vals) {
+      var total = 0,
+          size = vals.length;
+      for (var i = 0; i < size; i++) {
+        total += vals[i];
+      }
+      return total / size;
+    }
+
+    function medianOfArray(vals) {
+      var size = vals.length;
+      vals.sort(intSort);
+
+      //if array size is even, return avg of middle 2 numbers
+      //if array size is odd, return middle number
+      return size % 2 === 0 ?
+        (vals[size / 2 - 1] + vals[size / 2]) / 2 :
+        vals[(size - 1 / 2)];
+    }
+
+    function modeOfArray(vals) {
+      var retArray = [];
+      for (var i = 0; i < vals.length; i++) {
+        //add to array if value is not present
+        if(retArray.indexOf(vals[i]) === -1) {
+          retArray.push(vals[i]);
+        }
+      }
+      return retArray.sort(intSort);
+    }
+
+    function stdDevOfArray(vals) {
+      var avg = meanOfArray(vals);
+      var diffVals = [];
+
+      for (var i = 0; i < vals.length; i++) {
+        var diff = vals[i] - avg;
+        diffVals.push(diff * diff);
+      }
+
+      var avgDiff = meanOfArray(diffVals);
+      return Math.sqrt(avgDiff);
+    }
+
+    //helper function to sort integers correctly
+    function intSort(a, b) {
+      return a - b;
+    }
+  </script>
+
+</head>
+<body>
+<div id="header">
+  <div class="left">
+    <h3>
+      Random Scatterplot Generator
+    </h3>
+  </div>
+  <div class="right">
+    <button style="margin:18px 20px 0 0;" onclick="main();">
+      New Data &#8635
+    </button>
+    <button style="margin:18px 50px 0 0;" onclick="location.href='https://dongell.github.io/cosc4500-intro-techskills-demo/Boyle-Derek-006175141.html';">
+      View in GitHub &#8663
+    </button>
+  </div>
+</div>
+
+<div id="stats"></div>
+
+<div id="graph"></div>
+
+<script>
+  main();
+</script>
+
+</body>
+</html>
