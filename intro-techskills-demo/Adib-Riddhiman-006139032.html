@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<!--
+  The code is hosted live at: https://adib2149.github.io/advanced-data-science-course-projects/project1/index.html
+  Code inspiration: http://bl.ocks.org/weiglemc/6185069
+-->
+
+<meta charset="utf-8">
+<style>
+body {
+  font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
+</style>
+
+<body>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+
+
+
+
+// QUES 1
+// generate the arrays with random numbers
+var pointsX = d3.range(10).map(function() { return Math.floor((Math.random() * 10) + 1); });
+var pointsY = d3.range(10).map(function() { return Math.floor((Math.random() * 10) + 1); });
+
+// merge them into 2d dataset
+var data = [];
+for (let i = 0; i < pointsX.length; i++) {
+  const valX = pointsX[i];
+  const valY = pointsY[i];
+  data.push({x: valX, y: valY});
+}
+
+// display the arrays
+var div1 = d3.select('body').append('div')
+div1.append('h1').text(function(d) { return "Randomly generated datapoints:"; });
+
+div1.append('p').text(function(d) { 
+  var numbers = '1st array: ';
+  for (let i = 0; i < pointsX.length; i++) {
+    const element = pointsX[i];
+    numbers = numbers + element;
+    if (i < pointsX.length - 1) {
+      numbers = numbers + ', '
+    }
+  }
+  return numbers; 
+});
+
+div1.append('p').text(function(d) { 
+  var numbers = '2nd array: ';
+  for (let i = 0; i < pointsY.length; i++) {
+    const element = pointsY[i];
+    numbers = numbers + element;
+    if (i < pointsX.length - 1) {
+      numbers = numbers + ', '
+    }
+  }
+  return numbers; 
+});
+
+div1.append('p').text(function(d) { 
+  var numbers = 'Merged datapoints: ';
+  for (let i = 0; i < data.length; i++) {
+    const element = data[i];
+    numbers = numbers + "(" + element.x + ", " + element.y + ")";
+    if (i < pointsX.length - 1) {
+      numbers = numbers + ', '
+    }
+  }
+  return numbers; 
+});
+
+
+
+
+
+
+
+
+// QUES 2
+// display the mean, median, mode, std
+function mode(arr) { 
+  var mode = 0;
+  var count = 0;
+    for(var i = 0; i < arr.length; i++){
+      for(var j = 0; j < i; j++){
+        if(arr[j] === arr[i]){
+            mode = arr[j];
+            count++;
+        }
+      }
+    }
+    return mode;
+}
+
+var div2 = d3.select('body').append('div')
+div2.append('h1').text(function(d) { return "Mean, median and standard deviation:"; });
+div2.append('h2').text(function(d) { return "1st array"; });
+div2.append('p').text(function(d) { 
+  return "Mean: " + d3.mean(pointsX) + ", Median: " + d3.median(pointsX) + ", Mode: " + mode(pointsX) + ", Standard deviation: " + d3.deviation(pointsX); 
+});
+div2.append('h2').text(function(d) { return "2nd array"; });
+div2.append('p').text(function(d) { 
+  return "Mean: " + d3.mean(pointsY) + ", Median: " + d3.median(pointsY) + ", Mode: " + mode(pointsY) + ", Standard deviation: " + d3.deviation(pointsY); 
+});
+
+
+
+// setting up the canvas
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 400 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+var div3 = d3.select('body').append('div')
+div3.append('h1').text(function(d) { return "Scatter plot:"; });
+
+
+
+// QUES 3
+// setting up x-axis
+var xValue = function(d) { return d.x;}, 
+    xScale = d3.scale.linear().range([0, width]), 
+    xMap = function(d) { return xScale(xValue(d));}, 
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+// setting up y-axis
+var yValue = function(d) { return d.y;}, 
+    yScale = d3.scale.linear().range([height, 0]), 
+    yMap = function(d) { return yScale(yValue(d));},
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+
+
+
+// QUES 4
+// setting up fill color
+var cValue = function(d) { return d.Manufacturer;},
+    color = d3.scale.category10();
+
+// adding graph canvas
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// adding tooltip area
+var tooltip = d3.select("body").append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
+// adding space to avoid overlapping of axes
+xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+
+
+
+// QUES 6
+// x-axis
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("x", width)
+    .attr("y", -6)
+    .style("text-anchor", "end")
+    .text("Count of Michael Scott's joke");
+
+// y-axis
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Count of Kevin Malone's awkward look");
+
+
+// QUES 5
+// draw dots
+svg.selectAll(".dot")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("class", "dot")
+    .attr("r", 3.5)
+    .attr("cx", xMap)
+    .attr("cy", yMap)
+    .style("fill", function(d) { return color(cValue(d));}) 
+    .on("mouseover", function(d) {
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", .9);
+        tooltip.html("(" + xValue(d) + ", " + yValue(d) + ")")
+          .style("left", (d3.event.pageX + 5) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(d) {
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+    });
+
+
+
+</script>
+
+</body>
+
+</html>
