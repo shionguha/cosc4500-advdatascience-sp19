@@ -58,9 +58,9 @@
     		console.log(Binfo[i])
 	}
 
-	var margin = {top: 25, right: 20, bottom: 70, left: 70}
-	var width = 1000 - margin.left - margin.right
-	var height = 600 - margin.top - margin.bottom;
+	var margin = {top: 25, right: 25, bottom: 70, left: 70}
+	var width = 500 - margin.left - margin.right
+	var height = 500 - margin.top - margin.bottom;
 
 	var xlabels = d3.scaleLinear().domain([0, d3.max(A)]).range([0, width])
 	var ylabels = d3.scaleLinear().domain([0, d3.max(B)]).range([height, 0])
