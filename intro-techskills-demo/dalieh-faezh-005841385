@@ -1,0 +1,117 @@
+//Link to my code: "fdalieh.github.io/index.html"
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript">
+  
+
+       function creatArray()
+{
+   var arr = [];      
+           for (var i=0, limit=10; i<limit; i++) {
+           arr.push(Math.round(Math.random() * limit))
+           }
+return arr
+  
+}
+  
+function mean(numbers) {
+       var final = 0, i;
+       for (i = 0; i < numbers.length; i++) {
+           final += numbers[i];
+       }
+       return final / numbers.length;
+       }
+  
+function median(numbers) {
+       var median = 0, numsLen = numbers.length;
+            numbers.sort();
+
+   if (numsLen%2===0) {
+   median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
+}
+        else {
+           median = numbers[(numsLen - 1) / 2];
+       }
+               return median;
+           }
+function mode(numbers) {
+           var modes = [];
+var count = [], i, number, maxIndex = 0;
+
+            for (i = 0; i < numbers.length; i += 1) {
+           number = numbers[i];
+           count[number] = (count[number] || 0) + 1;
+       if (count[number] > maxIndex) {
+       maxIndex = count[number];
+           }
+           }
+
+       for (i in count)
+       if (count.hasOwnProperty(i)) {
+           if (count[i] === maxIndex) {
+           modes.push(Number(i));
+       }
+       }
+       return modes;
+       }
+  
+array_first = creatArray();
+array_second = creatArray();
+       document.write("First Random Array: "+array_first);
+document.write("<br>");
+       document.write("Second Random Array: "+array_second);
+document.write("<br>");
+       document.write("Mean of First Random Array: "+mean(array_first));
+document.write("<br>");
+       document.write("Mean of Second Random Array: "+mean(array_second));
+  
+document.write("<br>");
+       document.write("Median of First Random Array: "+median(array_first));
+document.write("<br>");
+       document.write("Median of Second Random Array: "+median(array_second));
+  
+document.write("<br>");
+       document.write("Mode of First Random Array: "+mode(array_first));
+document.write("<br>");
+       document.write("Mode of Second Random Array: "+mode(array_second));
+
+window.onload = function () {
+var chart = new CanvasJS.Chart("chartContainer",
+{
+title:{
+text: "Random Data On Scatter Plot"
+},
+
+data: [
+{
+type: "scatter",
+dataPoints: [
+
+{ x: array_first[0], y: array_second[0] },
+{ x: array_first[1], y: array_second[1] },
+{ x: array_first[2], y: array_second[2] },
+{ x: array_first[3], y: array_second[3] },
+{ x: array_first[4], y: array_second[4] },
+{ x: array_first[5], y: array_second[5] },
+  
+{ x: array_first[6], y: array_second[6] },
+{ x: array_first[7], y: array_second[7] },
+{ x: array_first[8], y: array_second[8] },
+{ x: array_first[9], y: array_second[9] }
+]
+}
+]
+});
+
+chart.render();
+}
+</script>
+<script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</head>
+<body>
+<div id="chartContainer" style="height: 300px; width: 100%;">
+</div>
+</body>
+</html>
