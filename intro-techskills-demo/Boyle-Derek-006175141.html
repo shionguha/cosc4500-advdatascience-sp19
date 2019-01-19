@@ -147,24 +147,24 @@
         {key: 'axis', label: 'AXIS', width: '40'},
         {key: 'mean', label: 'MEAN', width: '60'},
         {key: 'median', label: 'MEDIAN', width: '60'},
-        {key: 'mode', label: 'MODE', width: '130'},
+        {key: 'mode', label: 'MODE', width: '120'},
         {key: 'stddev', label: 'STD DEV', width: '90'}
       ];
       var colAlign = ['center', 'right', 'right', 'right', 'right'];
       var data = [
         {
           axis: 'X',
-          mean: meanOfArray(xVals).toFixed(1),
-          median: medianOfArray(xVals).toFixed(1),
+          mean: meanOfArray(xVals.slice()).toFixed(1),
+          median: medianOfArray(xVals.slice()).toFixed(1),
           mode: modeOfArray(xVals.slice()),
-          stddev: stdDevOfArray(xVals).toFixed(5)
+          stddev: stdDevOfArray(xVals.slice()).toFixed(5)
         },
         {
           axis: 'Y',
-          mean: meanOfArray(yVals).toFixed(1),
-          median: medianOfArray(yVals).toFixed(1),
+          mean: meanOfArray(yVals.slice()).toFixed(1),
+          median: medianOfArray(yVals.slice()).toFixed(1),
           mode: modeOfArray(yVals.slice()),
-          stddev: stdDevOfArray(yVals).toFixed(5)
+          stddev: stdDevOfArray(yVals.slice()).toFixed(5)
         }
       ];
 
@@ -217,11 +217,11 @@
       });
 
       var xScale = d3.scaleLinear()
-                     .domain([0, MAX_VALUE])
+                     .domain([1, MAX_VALUE])
                      .range([0, WIDTH]);
 
       var yScale = d3.scaleLinear()
-                     .domain([0, MAX_VALUE])
+                     .domain([1, MAX_VALUE])
                      .range([HEIGHT, 0]);
 
       //#4 - Build a svg-based scatterplot based on the random, count data generated in [1].
@@ -328,14 +328,27 @@
     }
 
     function modeOfArray(vals) {
-      var retArray = [];
+      var modeArray = new Array(vals.length);
+      var maxVal = 0,
+          retArray = [];
+      // init vals to 0
+      for (var i = 0; i < modeArray.length; i++) {
+        modeArray[i] = 0;
+      }
+      // sum frequencies
       for (var i = 0; i < vals.length; i++) {
-        //add to array if value is not present
-        if(retArray.indexOf(vals[i]) === -1) {
-          retArray.push(vals[i]);
+        modeArray[vals[i]-1]++;
+      }
+      for (var i = 0; i < modeArray.length; i++) {
+        if(modeArray[i] === maxVal) {
+          retArray.push(i+1);
+        } else if (modeArray[i] > maxVal) {
+          retArray = [];
+          retArray.push(i+1);
+          maxVal = modeArray[i];
         }
       }
-      return retArray.sort(intSort);
+      return retArray.join(", ");
     }
 
     function stdDevOfArray(vals) {
