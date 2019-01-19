@@ -3,7 +3,6 @@
 	//https://reidholben.github.io/cosc4500-advdatascience-sp19/intro-techskills-demo/Holben-Reid-006117123.html
     <head>
         <meta charset="utf-8">
-        <title>D3 Test</title>
         <script src="https://d3js.org/d3.v5.min.js"></script>
     </head>
     <body>
@@ -43,7 +42,7 @@
     return max
 }
 	
-	titles = ["Data", "Mean", "Median", "Mode", "Standard Deviation"];
+	titles = ["Array Numbers", "Mean", "Median", "Mode", "Standard Deviation"];
 	Ainfo = [A, d3.mean(A), d3.median(A), mode(A), d3.deviation(A)];
 	Binfo = [B, d3.mean(B), d3.median(B), mode(B), d3.deviation(B)];
 
@@ -57,21 +56,19 @@
     		console.log(Ainfo[i])
     		console.log(Binfo[i])
 	}
-
 	var margin = {top: 25, right: 25, bottom: 70, left: 70}
 	var width = 500 - margin.left - margin.right
 	var height = 500 - margin.top - margin.bottom;
-
 	var xlabels = d3.scaleLinear().domain([0, d3.max(A)]).range([0, width])
 	var ylabels = d3.scaleLinear().domain([0, d3.max(B)]).range([height, 0])
 
 	var chart = d3.select("body").append("svg:svg").attr("width", width + margin.right + margin.left).attr("height", height + margin.top + margin.bottom)
 	var main = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").attr("width", width).attr("height", height).attr("class", "main")
 
-	var xAxis = d3.axisBottom(xlabels)
-	main.append("g").attr("transform", "translate(0," + height + ")").attr("class", "main axis date").call(xAxis)
-	var yAxis = d3.axisLeft(ylabels)
-	main.append("g").attr("transform", "translate(0,0)").attr("class", "main axis date").call(yAxis)
+	var sideaxis = d3.axisLeft(ylabels)
+	main.append("g").attr("transform", "translate(0,0)").attr("class", "main axis date").call(sideaxis)
+	var bottomaxis = d3.axisBottom(xlabels)
+	main.append("g").attr("transform", "translate(0," + height + ")").attr("class", "main axis date").call(bottomaxis)
 
 	var total = new Array(10)
 	for(var i = 0; i < 10; i++)
@@ -98,7 +95,6 @@
 	main.append("text").attr("transform", "translate(" + (width/2) + " ," + (height + 	margin.top + 20) + ")").style("text-anchor", "middle").text("Saves Per Game")
 	main.append("g").call(d3.axisLeft(ylabels))
 	main.append("text").attr("transform", "rotate(-90)").attr("ylabels", 0 - margin.left).attr("xlabels", 0 - (height/2)).attr("dy", "1em").style("text-anchor", "middle").text("Goals Per Game")
-
 
         </script>
     </body>
