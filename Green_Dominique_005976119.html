@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+/*
+Dominique Green
+Intro Tech Skills Demo 
+
+*/
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<tile>Intro Tech Skills Demo</tile>
+<head>
+    <meta charset="utf-8" />
+    
+</head>
+<style>
+    body {
+        font: 18px sans-serif;
+
+        background-color:powderblue;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .dot {
+        stroke: #000;
+    }
+
+    .tooltip {
+        position: absolute;
+        width: 50px;
+        height: 28px;
+        pointer-events: none;
+    }
+</style>
+<body>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script>
+        //1. Using Javascript/D3, create 2 arrays of random, count data within the domain (1-10). Sample size of each array should be 10.
+        var one = []
+        var two = []
+        for (var n = 0; n < 10; n++) {
+            one.push(Math.floor(Math.random() * 10 + 1));
+            two.push(Math.floor(Math.random() * 10 + 1));
+        }
+        //2.Calculate mean, median, mode, standard deviation of each array and print them on the html with formatting.
+        function mode(array) {
+            if (array.length == 0)
+                return null;
+            var modeM = {}
+            var max = array[0], maxC = 1;
+            for (var i = 0; i < array.length; i++) {
+                var hi = array[i];
+                if (modeM[hi] == null) {
+                    modeM[hi] = 1;
+                }
+                else {
+                    modeM[hi]++;
+                }
+                if (modeM[hi] > maxC) {
+                    max = hi;
+                    maxC = modeM[hi];
+                }
+            }
+            return max;
+        }
+        document.write("<br /> <br/> Array one: " + one + ", Mean: " + d3.mean(one) + ", Median: " + d3.median(one) + ", Mode: " + mode(one) + ", Standard Deviation: " + d3.deviation(one) + "<br />");
+        document.write("Array two: " + two + ", Mean: " + d3.mean(two) + ", Median: " + d3.median(two) + ", Mode: " + mode(two) + ", Standard Deviation: " + d3.deviation(two));
+
+        //3. Use these 2 arrays to define a x-axis and y-axis. & 4. Build a svg - based scatterplot based on the random, count data generated in [1].
+      
+        var combine = []
+        for (var i = 0; i < 10; i++) {
+            combine[i] = [one[i], two[i]];
+        }
+
+        var margin = { top: 20, right: 15, bottom: 60, left: 60 }
+        var wide = 960 - margin.left - margin.right
+        var high = 500 - margin.top - margin.bottom;
+       
+        var x = d3.scaleLinear().domain([0, d3.max(one)]).range([0, wide])
+        var y = d3.scaleLinear().domain([0, d3.max(two)]).range([high, 0])
+        
+        var chart = d3.select("body")
+            .append("svg:svg")
+            .attr("width", wide + margin.right + margin.left)
+            .attr("height", high + margin.top + margin.bottom)
+
+        var main = chart.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("width", wide).attr("height", high).attr("class", "main")
+        
+       
+        main.append("g")
+            .attr("transform", "translate(0," + high + ")")
+            .attr("class", "main axis date").call(d3.axisBottom(x))
+        
+        main.append("g")
+            .attr("transform", "translate(0,0)")
+            .attr("class", "main axis date").call(d3.axisLeft(y))
+      
+        var g = main.append("svg:g")
+       
+        var dpt = g.selectAll("scatter-dots")
+            .data(combine)
+            .enter().append("svg:circle")
+            .attr("cx", function (d, i) {
+                return x(d[0])
+            }).attr("cy", function (d) {
+                return y(d[1])
+            }).attr("r", 5)
+            
+
+        //5. If I hover over any data point in said scatterplot, I should be able to see both data points i.e. 2,3 or 5,7 etc.
+        var tool = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        dpt.on("mouseover", function (d) {
+            tool.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tool.html("["+d[0]+","+d[1]+"]")
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+            .on("mouseout", function (d) {
+                tool.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        //6. Your axes should be named appropriately. Since it's random data, come up with the most innovative names that you can think of.
+
+        main.append("text")
+            .attr("text-anchor", "middle")  
+            .attr("transform", "translate(" + (wide/2) + "," +(high + margin.top +30) + ")")  
+            .text("Array One");
+
+        main.append("text")
+            .attr("text-anchor", "middle") 
+            .attr("transform", "translate(" + (0-30) + "," + (high /2) + ")rotate(-90)")  
+            .text("Array Two");
+
+
+
+       
+
+
+    </script>
+
+</body>
+
+</html >
