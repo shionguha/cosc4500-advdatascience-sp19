@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<! Link to HTML application: https://sdarji32.github.io/Advanced-Data-Science/>
+<html lang="en">
+<head>
+    <title>SVG ScatterPlot</title>
+    <style>body {
+        background-color:bisque;;
+    }
+    html, body {
+        margin: 0;
+        padding: 0;
+    }
+    .axis {
+        font-size: 12px;
+    }
+    .grid line {
+        stroke: #D3D3D3;
+        stroke-opacity: 0.7;
+        stroke-dasharray: 1;
+        shape-rendering: crispEdges;
+    }
+    .coord{
+        background-color: blue;
+        fill-opacity: .5;
+    }
+    div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 30px;
+        height: 15px;
+        padding: 2px;
+        font: 12px sans-serif;
+        pointer-events: none;
+        opacity: 1;
+    }</style>
+</head>
+<br/>
+<button id="tbl" onclick="createTable()">Measures of Central Tendency</button>
+<body>
+    <div class="hover"></div>
+    <h1> SVG Scatterplot using d3</h1>
+    <div id="div"></div>
+    <div id="Graph"></div>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script>var w = 650;
+    var h = 650;
+    var mar = {top: 20, right: 20, bottom: 60, left: 60};
+    var bucket = [];
+
+    for (var i=0;i<=10;i++) {
+        var rand = getRandInt(1,10);
+        bucket.push(rand);
+    }
+
+    function getRandInt(min,max){
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) +min;
+    }
+
+    var bucket2 = [];
+
+    for (var i=0;i<=10;i++) {
+        var rand2 = getRandInt(1,10);
+        bucket2.push(rand2);
+    }
+    // Joined array with x and y key labels as paired points
+    let coordinates = bucket.map(function(value,index){
+        return {x:value,y:bucket2[index]}
+    });
+
+    var data = bucket.concat(bucket2);
+    //console.log(data);
+
+    //Step 2: Mean of an array
+    let m = d3.mean(data);
+    // Step 2: Mode of an array
+    function mode(data) {
+        var count = {};
+        var mode = [];
+        var max = 0;
+        for (var i in data) {
+            if (!(data[i] in count))
+                count[data[i]] = 0;
+            count[data[i]]++;
+            if (count[data[i]] == max)
+                mode.push(data[i]);
+            else if (count[data[i]] > max) {
+                max = count[data[i]];
+                mode = [data[i]];
+            }
+        }
+        return mode;
+    }
+    // Step 2: Median of an array
+    let  median = d3.median(data);
+    console.log("Median:");
+    console.log(median);
+    //  Step 2: Standard Deviation of  the random array data
+    let std = d3.deviation(data);
+    console.log("Standard Deviation:");
+    console.log(std);
+
+    // x-axis and y-axis setup
+    var xLabel = d3.scaleLinear()
+        .domain([1, 10])
+        .range([0, w]);
+
+    var yLabel = d3.scaleLinear()
+        .domain([1, 10])
+        .range([h/.85, 0]);
+
+    var tooltip = d3.select("#Graph").append("div").attr('class', 'tooltip');
+
+    //d3 declaration
+    var svg = d3.select("#Graph").append("svg").attr("width",w).attr("height",h).attr("class","canvas").append("g").attr("transform","translate(85,85)" );
+    svg.selectAll("circle")
+        .data(coordinates)
+        .enter()
+        .append("circle").attr("r", 6)
+        .attr("cx",function(d)
+        {return (d.x-1)*60})
+        .attr("cy",function(d)
+        {return h - (d.y-1)*60})
+        .attr("fill","blue")
+        .attr("class", "coord")
+        .on("mouseover", function(d){
+            tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function(d){
+            tooltip.text(d.x + ", " + d.y);
+            tooltip.style("top", (event.pageY) + "px")
+            tooltip.style("left", (event.pageX) + "px")
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0.7);
+        });
+
+    svg.selectAll("text")
+        .data(coordinates)
+        .enter()
+        .append("text")
+        .attr("x", function(d) {
+            return  d.x*60;
+        })
+        .attr("y", function(d) {
+            return  d.y*60;
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "13px")
+        .attr("fill", "black");
+
+    // y-axis
+    svg.append("g")
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yLabel));
+
+    // y-axis label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - mar.left)
+        .attr("x",0 - (h / 2))
+        //.attr("dy", "1em")
+        .attr("class", "axis-label")
+        .text("Weight(kg)");
+
+    // x-axis label
+    svg.append("text")
+        .attr("transform", "rotate(-2*90) ")
+        .attr('style', 'transform: translateY(590px)')
+        .attr("y", 0 - mar.bottom)
+        .attr("class", "axis-label")
+        .text("Height(cm)");
+
+    // x-axis
+    svg.append("g")
+        .attr('class', 'axis')
+        .attr('style', 'transform: translateY(495px)')
+        .call(d3.axisBottom(xLabel));
+
+
+    var b = document.createElement('button');
+    document.body.appendChild(b);
+    b.addEventListener("click", createTable, true);
+    function createTable(){
+        var div = document.createElement('div');
+        div.setAttribute("id", "tbl");
+        document.body.appendChild(div)
+        document.getElementById("tbl").innerHTML = "<table border = '1'>" +
+            '<tr>' +
+            '<th>Mean:</th>' +
+            '<th>Median:</th> ' +
+            '<th>Mode:</th>' +
+            '<th>Standard Deviation:</th>' +
+            '</tr>' +
+            '<tr>' +
+            '<td>'+m+' </td>' +
+            '<td>'+median+'</td>' +
+            '<td>'+mode(data)+'</td>' +
+            '<td>'+std+'</td>' + '</tr>'
+    }
+    </script>
+</body>
+</html>
