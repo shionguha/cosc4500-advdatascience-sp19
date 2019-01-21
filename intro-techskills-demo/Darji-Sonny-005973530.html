@@ -45,6 +45,7 @@
     <script>var w = 650;
     var h = 650;
     var mar = {top: 20, right: 20, bottom: 60, left: 60};
+        //Step 1: two arrays generating random number in domain(1,10)
     var bucket = [];
 
     for (var i=0;i<=10;i++) {
@@ -124,6 +125,7 @@
         {return h - (d.y-1)*60})
         .attr("fill","blue")
         .attr("class", "coord")
+        //Step 5: hover over data points
         .on("mouseover", function(d){
             tooltip.style("visibility", "visible");
         })
@@ -137,22 +139,8 @@
                 .duration(500)
                 .style("opacity", 0.7);
         });
-
-    svg.selectAll("text")
-        .data(coordinates)
-        .enter()
-        .append("text")
-        .attr("x", function(d) {
-            return  d.x*60;
-        })
-        .attr("y", function(d) {
-            return  d.y*60;
-        })
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "13px")
-        .attr("fill", "black");
-
-    // y-axis
+   //Step 6: Axis's labeled and positioned
+    //  Step 2: y-axis
     svg.append("g")
         .attr('class', 'axis')
         .call(d3.axisLeft(yLabel));
@@ -174,12 +162,13 @@
         .attr("class", "axis-label")
         .text("Height(cm)");
 
-    // x-axis
+    // Step 2: x-axis
     svg.append("g")
         .attr('class', 'axis')
         .attr('style', 'transform: translateY(495px)')
         .call(d3.axisBottom(xLabel));
 
+   // Step 3: Displays all the central modes of tendency in a table
 
     var b = document.createElement('button');
     document.body.appendChild(b);
