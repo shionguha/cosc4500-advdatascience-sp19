@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Intro-TechSkills-Demo</title>
+	</head>
+
+	<style>
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: #000;
+			shape-rendering: crispEdges;
+		}
+
+		.tooltip {
+			position: absolute;
+			width: 200px;
+			height: 28px;
+			pointer-events: none;
+		}
+	</style>
+		
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	
+	<script>
+
+		var nsamples=10, upper=10, lower=1, arr1 = [], arr2 = [];
+
+		for (i = 0; i < nsamples; i++) {
+			arr1.push(Math.floor(Math.random() * upper) + lower);
+			arr2.push(Math.floor(Math.random() * upper) + lower);
+		}
+
+		function mean(arr) {
+			var sum=0;
+			var len=arr.length;
+			for(var i=0; i<len; i++) {
+				sum += arr[i];
+			}
+			return sum/len;
+		}
+
+		function median(arr) {
+			var len=arr.length;
+			arr.sort((a, b) => a - b);
+			if(len%2 === 0) {
+				return (arr[(len/2)-1]+arr[(len/2)])/2;
+			} else {
+				return arr[(len/2)];
+			}
+		}
+
+		function mode(arr) {
+			var len=arr.length;
+			var freq = {}; 
+			var maxFreq = 0;
+			var mode = [];
+
+			for (var i=0; i<len; i++) {
+				freq[arr[i]] = (freq[arr[i]] || 0) + 1;
+
+				if (freq[arr[i]] > maxFreq) {
+					maxFreq = freq[arr[i]];
+				}
+			}
+
+			for (var k in freq) {
+				if (freq[k] === maxFreq) {
+					mode.push(k);
+				}
+			}
+
+			return mode;
+		}
+
+		function stddev(arr) {
+			var avg = mean(arr);
+			var sumdifsq=0;
+			var len=arr.length;
+			for(var i=0; i<len; i++) {
+				diff = (arr[i]-avg);
+				sumdifsq += (diff*diff);
+			}
+			return Math.sqrt(sumdifsq/len);
+		}
+
+		var body = d3.select('html').append('body')
+		var div1 = body.append('div')
+
+		div1.append('h1').text("Array1");
+		div1.append('h3').text("Random Numbers are: " + arr1.join(", "));
+		arr1.sort((a, b) => a - b);
+		div1.append('h3').text("When Sorted: " + arr1.join(", "));
+		div1.append('h3').text("Mean is : " + mean(arr1).toFixed(4));
+		div1.append('h3').text("Median is : " + median(arr1).toFixed(4));
+		div1.append('h3').text("Mode is : " + mode(arr1).join(", "));
+		div1.append('h3').text("Standard Deviation is : " + stddev(arr1).toFixed(4));
+
+		div1.append('h1').text("Array2");
+		div1.append('h3').text("Random Numbers are: " + arr2.join(", "));
+		arr2.sort((a, b) => a - b);
+		div1.append('h3').text("When Sorted: " + arr2.join(", "));
+		div1.append('h3').text("Mean is : " + mean(arr2).toFixed(4));
+		div1.append('h3').text("Median is : " + median(arr2).toFixed(4));
+		div1.append('h3').text("Mode is : " + mode(arr2).join(", "));
+		div1.append('h3').text("Standard Deviation is : " + stddev(arr2).toFixed(4));
+
+		var data = []
+		for(var i=0; i<nsamples; i++) {
+			data.push({x: arr1[i], y: arr2[i]});
+		}
+
+		// setting up the canvas
+		var margin = {top: 20, right: 20, bottom: 60, left: 80},
+		width = 500 - margin.left - margin.right,
+		height = 400 - margin.top - margin.bottom;
+
+		var div2 = body.append('div')
+		div2.append('h1').text("svg-based scatterplot");
+
+		var xValue = function(d) { return d.x;}, 
+		xScale = d3.scale.linear().range([0, width]), 
+		xMap = function(d) { return xScale(xValue(d));}, 
+		xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+		var yValue = function(d) { return d.y;}, 
+		yScale = d3.scale.linear().range([height, 0]), 
+		yMap = function(d) { return yScale(yValue(d));},
+		yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+		var cValue = function(d) { return 0;},
+		color = d3.scale.category10();
+
+		// adding graph canvas
+		var svg = body.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var tooltip = body.append("div")
+			.attr("class", "tooltip")
+			.style("opacity", 0);
+
+		xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+		yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis)
+			.append("text")
+			.attr("class", "label")
+			.attr("x", width-100)
+			.attr("y", 50)
+			.style("text-anchor", "end")
+			.text("Litres of liquid consumed in a day");
+
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+			.append("text")
+			.attr("class", "label")
+			.attr("transform", "rotate(-90)")
+			.attr("x", -50)
+			.attr("y", -40)
+			.style("text-anchor", "end")
+			.text("Restroom visit count in a day");
+
+
+		svg.selectAll(".dot")
+		    .data(data)
+		    .enter()
+		    .append("circle")
+		    .attr("class", "dot")
+		    .attr("r", 3)
+		    .attr("cx", xMap)
+		    .attr("cy", yMap)
+		    .style("fill", function(d) { return color(cValue(d));}) 
+		    .on("mouseover", function(d) {
+		        tooltip.transition()
+		          .duration(200)
+		          .style("opacity", 1);
+		        tooltip.html("(" + xValue(d) + ", " + yValue(d) + ")")
+		          .style("left", (d3.event.pageX + 5) + "px")
+		          .style("top", (d3.event.pageY - 20) + "px");
+		    })
+		    .on("mouseout", function(d) {
+		        tooltip.transition()
+		          .duration(300)
+		          .style("opacity", 0);
+		    });
+
+		var div3 = body.append('div')
+		div3.append('h1').text("Link to my Github Hosted html");
+		div3.append('a').attr("href","https://www.github.com").text("www.github.com")
+
+		div3.append('h2').text("References and Thanks");
+		div3.append('a').attr("href","https://bl.ocks.org/jrbalsano").text("Jonathan Balsano’s Blocks")
+		div3.append('br')
+		div3.append('a').attr("href","https://bl.ocks.org/d3noob").text("d3noob’s Blocks")
+		div3.append('br')
+		div3.append('a').attr("href","https://www.stackoverflow.com").text("Stackoverflow - Developer's Best Resource")
+
+	</script>
+</html>
