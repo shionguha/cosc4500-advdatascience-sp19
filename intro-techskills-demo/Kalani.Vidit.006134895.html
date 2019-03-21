@@ -1,0 +1,203 @@
+<html>
+    <head>
+        <!-- https://viditkalani.github.io/kalani.vidit.006134895/kalani.vidit.006134895.html
+        References are below the each answers.
+         -->
+        <style media="screen">
+          circle {
+            fill : #FF1493	;
+          }
+
+          .table-container {
+            width: 80%;
+            margin: 30px auto;
+          }
+          table {
+            margin-left: 10;
+            margin-right: 0;
+            margin-top: 0;
+            padding-bottom: 0;
+            padding-left: 0;
+            padding-right: 0;
+            padding-top: 0;
+            margin-bottom: 1.45rem;
+            font-size: 1rem;
+            line-height: 1.45rem;
+            border-collapse: collapse;
+            width: 100%;
+          }
+          td,
+          th {
+            text-align: left;
+            border-bottom: 1px solid hsla(0, 0%, 0%, 0.12);
+            font-feature-settings: "tnum";
+            -moz-font-feature-settings: "tnum";
+            -ms-font-feature-settings: "tnum";
+            -webkit-font-feature-settings: "tnum";
+            padding-left: 0.96667rem;
+            padding-right: 0.96667rem;
+            padding-top: 0.725rem;
+            padding-bottom: calc(0.725rem - 1px);
+            color: #FF1493;
+          }
+          th:first-child,
+          td:first-child {
+            padding-left: 0;
+          }
+          th:last-child,
+          td:last-child {
+            padding-right: 0;
+          }
+          h1{
+            color: #FF1493
+          };
+
+        </style>
+
+       <script src="https://d3js.org/d3.v4.js">
+       </script>
+    </head>
+    <body>
+        <table id="table"><h1>Here table to create a Random Arrays and calculate Median, Mean, Mod and Standard Deviation....</h1></table>
+
+  <script type="text/javascript">
+
+      //1. Using Javascript/D3, create 2 arrays of random, count data within the domain (1-10). Sample size of each array should be 10.
+
+            var Array1 = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10) + 1);
+            var Array2 = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10) + 1);
+
+      // Reference:
+      // 1. https://www.w3schools.com/js/js_random.asp
+      // 2. https://www.w3schools.com/js/js_math.asp
+
+      // 2. Calculate mean, median, mode, and standard deviation of each array and print them on the html with formatting.
+            function mode(Array)
+            {
+               var modeMap = [], maxEl = Array[0], maxCount = 1
+               for(var i = 0; i < Array.length; i++)
+               {
+                   var el = Array[i]
+                   if(modeMap[el] == null)
+                   {
+                       modeMap[el] = 1
+                   }
+                   else
+                   {
+                       modeMap[el]++
+                   }
+                   if(modeMap[el] > maxCount)
+                   {
+                       maxEl = el;
+                       maxCount = modeMap[el];
+                   }
+               }
+               return maxEl
+            }
+            title = ["Arrays", "Data ", "Mean ", "Median ", "Mode ", "Stad-Div "]
+            values1 = ["1st Array", Array1, d3.mean(Array1) , d3.median(Array1), mode(Array1), d3.deviation(Array1)]
+            values2 = ["2nd Array", Array2, d3.mean(Array2), d3.median(Array2), mode(Array2), d3.deviation(Array2)]
+
+      // displays Arrays, Mean, Median, Mode & Standard Deviation values
+            for(var i = 0; i < title.length; i++)
+            {
+               var row = d3.select("#table").append("tr")
+               row.append("th").text(title[i])
+               row.append("td").text(values1[i])
+               row.append("td").text(values2[i])
+               console.log(title[i])
+               console.log(values1[i])
+               console.log(values2[i])
+            }
+
+      // Reference:
+      // 1. https://stackoverflow.com/questions/1053843/get-the-element-with-the-highest-occurrence-in-an-array
+      // 2. https://jonlabelle.com/snippets/view/javascript/calculate-mean-median-mode-and-range-in-javascript
+      </script>
+
+      <div id="chart"><h1> Scatter Plot.... </h1></div>
+
+      <script type="text/javascript">
+      // 3. Use these 2 arrays to define a x-axis and y-axis.
+
+            var margin = {top: 40, right: 25, bottom: 100, left: 50},
+                width = 900 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+            var x = d3.scaleLinear().domain([0, d3.max(Array1)]).range([0, width])
+            var y = d3.scaleLinear().domain([0, d3.max(Array2)]).range([height, 0])
+            var chart = d3.select("body").append("svg:svg").attr("width", width + margin.right + margin.left)
+                        .attr("height", height + margin.top + margin.bottom)
+            var main = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                        .attr("width", width).attr("height", height).attr("class", "main")
+            // X-Axis
+            var xAxis = d3.axisBottom(x)
+            main.append("g").attr("transform", "translate(0," + height + ")").attr("class", "main axis date").call(xAxis)
+
+            // Y-Axis
+            var yAxis = d3.axisLeft(y)
+            main.append("g").attr("transform", "translate(0,0)").attr("class", "main axis date").call(yAxis)
+
+      // Reference for ans 3 & 4:
+      // 1. http://www.tutorialsteacher.com/d3js/axes-in-d3
+      // 2. https://gist.github.com/mbostock/3019563
+      // 3. https://d3indepth.com/scales/
+      // 4. https://bost.ocks.org/mike/bar/3/
+      // 5. http://bl.ocks.org/weiglemc/6185069
+      // 6. https://stackoverflow.com/questions/41152438/d3-js-visualization-how-to-add-y-axis-gridlines
+
+      // 4. Build a svg-based scatterplot based on the random count data generated in 1.
+            var data = new Array(10)
+            for(var i = 0; i < 10; i++)
+            {
+               data[i] = [Array1[i], Array2[i]]
+            }
+            var g = main.append("svg:g")
+            var div = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 1);
+            var points = g.selectAll("scatter-dots")
+                         .data(data).enter()
+                         .append("svg:circle")
+                         .attr("cx", function(d,i) {
+                            return x(d[0])
+                          })
+                         .attr("cy", function(d) {
+                            return y(d[1])
+                          })
+                         .attr("r", 5)
+
+      // Reference for ans 3 & 4:
+      // 1. http://www.tutorialsteacher.com/d3js/axes-in-d3
+      // 2. https://gist.github.com/mbostock/3019563
+      // 3. https://d3indepth.com/scales/
+      // 4. https://bost.ocks.org/mike/bar/3/
+      // 5. http://bl.ocks.org/weiglemc/6185069
+
+      // 5. If I hover over any data point in said scatterplot, I should be able to see both data points.
+            points.on("mouseover", function(d) {
+               div.transition().duration(200).style("opacity", "1")
+               div.html("(" + d[0] + "," + d[1] + ")")
+            }).on("mouseout", function(d) {
+               div.transition().duration(500).style("opacity", "1")
+            })
+
+      // Reference:
+      // 1. https://chartio.com/resources/tutorials/how-to-show-data-on-mouseover-in-d3js/
+      // 2. http://bl.ocks.org/larsenmtl/ec50d6ab230f127d5cd9
+      // 3. https://bl.ocks.org/d3noob/257c360b3650b9f0a52dd8257d7a2d73
+      // 4. http://bl.ocks.org/williaster/af5b855651ffe29bdca1
+
+
+      // 6. Your axes should be named appropriately. Since it's random data, come up with the most innovative names that you can think of.
+            main.append("g").attr("transform", "translate(0 ," + height + ")")
+                            .call(d3.axisBottom(x))
+            main.append("text").attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 5) + ")")
+                        .style("text-anchor", "end").text(" Undefine Unknown Array 1")
+            main.append("g").call(d3.axisLeft(y))
+            main.append("text").attr("transform", "rotate(-90)")
+                        .attr("y", 0 - margin.left)
+                        .attr("x", 0 - (height/2))
+                        .attr("dy", "1em")
+                        .style("text-anchor", "end")
+                        .text(" Undefine Unknown Array 2")
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <html>
 
 <!--
-  The code is hosted live at: https://adib2149.github.io/advanced-data-science-course-projects/project1/index.html
+  The code is hosted live at: https://adib2149.github.io/advanced-data-science-course-projects/project1/Adib-Riddhiman-006139032.html
   Code inspiration: http://bl.ocks.org/weiglemc/6185069
 -->
 
@@ -103,22 +103,25 @@ div1.append('p').text(function(d) {
 
 // QUES 2
 // display the mean, median, mode, std
-function mode(arr) { 
-  var mode = 0;
-  var count = 0;
-    for(var i = 0; i < arr.length; i++){
-      for(var j = 0; j < i; j++){
-        if(arr[j] === arr[i]){
-            mode = arr[j];
-            count++;
+function mode(arr) {
+    var mode = {};
+    var max = 0, count = 0;
+
+    arr.forEach(function(e) {
+        if (mode[e]) { mode[e]++; }
+        else { mode[e] = 1; } 
+
+        if (count<mode[e]) { 
+            max = e;
+            count = mode[e];
         }
-      }
-    }
-    return mode;
+    });
+    
+    return max;
 }
 
 var div2 = d3.select('body').append('div')
-div2.append('h1').text(function(d) { return "Mean, median and standard deviation:"; });
+div2.append('h1').text(function(d) { return "Mean, median, mode and standard deviation:"; });
 div2.append('h2').text(function(d) { return "1st array"; });
 div2.append('p').text(function(d) { 
   return "Mean: " + d3.mean(pointsX) + ", Median: " + d3.median(pointsX) + ", Mode: " + mode(pointsX) + ", Standard deviation: " + d3.deviation(pointsX); 
@@ -204,7 +207,7 @@ svg.append("g")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("Count of Kevin Malone's awkward look");
+    .text("Count of Kevin Malone's awkward stare");
 
 
 // QUES 5
