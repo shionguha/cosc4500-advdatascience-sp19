@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<!-- 
+Nathan Lang
+Intro Tech Skills Demo
+link: https://nathanlang14.github.io/TechSkillsDemo/
+-->
+
+<meta charset="utf-8">
+<style>
+	body {
+	font: 14px sans-serif;
+	}
+	.axis path,
+	.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+.content {
+	max-width: 500px;
+	margin: auto;
+}
+.dot {
+	stroke: #000;
+}
+.tooltip {
+	position: absolute;
+	width: 200px;
+	height: 28px;
+	pointer-events: none;
+}
+td,th {
+border-bottom: 1px solid hsla(0, 0%, 0%, 0.12);
+color: #0000FF;
+}
+</style>
+<h2 align = "center">Tech Skills Demo for COSC 4500</h2>
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<table id="bat" align = "center" ></table>
+<script>
+
+	// 1. create 2 arrays with 10 instances of random numbers 1-10
+	var x_axis = Array.from({length: 10}, () => Math.floor(Math.random() * 10 +1));
+	var y_axis = Array.from({length: 10}, () => Math.floor(Math.random() * 10 +1));
+
+	// 2. calculate the mean, median, mode, and st. dev.
+	// reference: https://codereview.stackexchange.com/questions/68315/finding-the-mode-of-an-array
+	function mode(arr) {
+		var modeMap = [];
+		var max = arr[0];
+		var maxCount = 1;
+		for(var i = 0; i < arr.length; i++)
+		{
+			var a = arr[i];
+		if(modeMap[a] == null)
+		{
+			modeMap[a] = 1;
+		}
+		else
+		{
+			modeMap[a]++;
+		}
+		if(modeMap[a] > maxCount)
+		{
+			max = a;
+			maxCount = modeMap[a];
+		}
+		}
+		return max;
+	}
+
+	// calculates other stats and stores in arrays
+	xdata = [x_axis, d3.mean(x_axis), d3.median(x_axis), mode(x_axis), d3.deviation(x_axis)];
+	ydata = [y_axis, d3.mean(y_axis), d3.median(y_axis), mode(y_axis), d3.deviation(y_axis)];
+	cols = ["Array", "Mean", "Median", "Mode","Standard Deviation"];
+
+	// displays stat arrays
+	// row by row shows title and then the data for each array
+
+	for(var i = 0; i < cols.length; i++)
+	{
+	var row = d3.select("#bat").append("tr")
+
+	// make names bold as a header
+	row.append("th").text(cols[i])
+
+	// fill in columns with data 
+	row.append("td").text(xdata[i])
+	row.append("td").text(ydata[i])
+	}
+
+
+	// make 2d dataset of x and y points
+	var data = [];
+	for (i = 0; i < x_axis.length; i++) {
+	data.push({x: x_axis[i], y: y_axis[i]});
+	}
+
+	// plot is influenced by: http://bl.ocks.org/weiglemc/6185069
+
+	// setup size
+	var margin = {top: 30, right: 30, bottom: 30, left: 30},
+	width = 500 - margin.left - margin.right,
+	height = 500 - margin.top - margin.bottom;
+
+	// 3. Set up axises
+	// x-axis
+	var xValue = function(d) { return d.x;}, 
+	xScale = d3.scale.linear().range([0, width]), 
+	xMap = function(d) { return xScale(xValue(d));}, 
+	xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+	// y-axis
+	var yValue = function(d) { return d.y;}, 
+	yScale = d3.scale.linear().range([height, 0]), 
+	yMap = function(d) { return yScale(yValue(d));},
+	yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+	// 4. svg-based scatterplot
+
+
+	// adding graph canvas
+	var svg = d3.select("body").append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// adding tooltip area
+	var tooltip = d3.select("body").append("div")
+		.attr("class", "tooltip")
+		.style("opacity", 0);
+
+	// adding space to avoid overlapping of axes
+	xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+	yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+	// 6. Name Axises
+
+	// x-axis
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.append("text")
+		.attr("class", "label")
+		.attr("x", width)
+		.attr("y", -6)
+		.style("text-anchor", "end")
+		.text("Amount of Refreshes on This Page (Millions)");
+	// y-axis
+	svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append("text")
+		.attr("class", "label")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("Stress Level");
+
+
+	// 5. Show data and all hover over
+	svg.selectAll(".dot")
+		.data(data)
+		.enter()
+		.append("circle")
+		.attr("class", "dot")
+		.attr("r", 6)
+		.attr("cx", xMap)
+		.attr("cy", yMap)
+		.style("fill", "blue") 
+		.on("mouseover", function(d) {
+		tooltip.transition()
+		.duration(200)
+		.style("opacity", .6);
+		tooltip.html("(" + xValue(d) + ", " + yValue(d) + ")")
+		.style("left", (d3.event.pageX + 5) + "px")
+		.style("top", (d3.event.pageY - 28) + "px");
+		})
+		.on("mouseout", function(d) {
+		tooltip.transition()
+		.duration(500)
+		.style("opacity", 0);
+		});
+
+</script>
+</body>
+
+</html>

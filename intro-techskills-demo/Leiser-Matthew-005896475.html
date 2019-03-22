@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!--
+			Matthew Leiser
+			COSC 4500
+			Intro Tech Skills Demo
+			https://mleiser.github.io/5500-project/Leiser-Matthew-005896475.html
+			Done entirely in Vim
+	  	-->
+		<meta charset="utf-8">
+		<title>Intro Tech Skills Demo</title>
+		<script type="text/javascript" src="d3.js">
+		</script>
+	</head>
+	<BODY>
+		<script type="text/javascript">
+			var x = Array(10);
+			var y = Array(10);
+
+			var w = 500;
+			var h = 500;
+			var padding = 40;
+			
+			//Random Array Generator
+			var i;
+			for (i = 0; i < x.length; i++) {
+				x[i] = Math.round((Math.random() * 9) + 1);
+			}
+
+			for (i = 0; i < y.length; i++) {
+				y[i] = Math.round((Math.random() * 9) + 1);
+			}
+			
+			var coordinates = new Array();
+			
+			for (i = 0; i < x.length; i++) {
+				coordinates[i] = new Array(x[i], y[i]);	
+			}
+
+			//Calculates the Mean
+			function mean(numbers) {
+				var total = 0, i;
+				for (i = 0; i < numbers.length; i++) {
+					total += numbers[i];
+				}
+				return total / numbers.length;
+			}
+			
+	  		//Calculates the Median
+			function median(numbers) {
+				var median = 0; 
+				var numsLen = numbers.length;
+				numbers.sort();
+
+				if (numsLen % 2 === 0) {
+					median = (numbers[numsLen / 2 - 1] + numbers[numsLen /2]) / 2;
+				}
+
+				else {
+					median = numbers[(numsLen - 1) / 2];
+				}
+
+				return median;
+			}
+			
+			//Calculates the mode
+			function mode(numbers) {
+				var numMapping = {};
+				var greatestFreq = 0;
+				var mode;
+				numbers.forEach(function findMode(num) {
+					numMapping[num] = (numMapping[num] || 0) + 1;
+
+					if (greatestFreq < numMapping[num]) {
+						greatestFreq = numMapping[num];
+						mode = num;
+					}
+				});
+				return mode;
+			}
+			
+	  		//Calculates the standard deviation
+			function standardDeviation(numbers) {
+				var avg = mean(numbers);
+
+				var squareDiffs = numbers.map(function(value) {
+					var diff = value - avg;
+					var sqrDiff = diff * diff;
+					return sqrDiff;
+				});
+
+				var avgSquareDiff = mean(squareDiffs);
+
+				var stdDev = Math.sqrt(avgSquareDiff);
+
+				return stdDev;
+			}
+			
+			//Sets the svg dimensions
+			var svg = d3.select("body")
+					.append("svg")
+					.attr("width", w)
+					.attr("height", h);	
+					d3.select("body");
+			
+			var xScale = d3.scaleLinear().domain([0, 10]).range([padding, w - padding]);
+			var yScale = d3.scaleLinear().domain([0, 10]).range([h - padding, padding]);
+			
+			//Creates the tooltip shell
+			var tooltip = d3.select("body")
+					.append("div")
+					.attr("class", "tooltip")
+					.style("opacity", 0);
+			
+			//Creates and adds the xAxis
+			var xAxis = d3.axisBottom(xScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+	  		svg.append("g")
+				.attr("class", "axis")
+	  			.attr("transform", "translate(0," + (h - padding) + ")")
+	  			.call(xAxis);
+
+			svg.append("text")
+				.attr("transform", "translate(" + (w / 2) + " ," + (h - padding + 30) + ")")
+				.style("text-anchor", "middle")
+				.text("# of Programmers in 10 Classes");
+			
+			//Creates and adds the yAxis
+			var yAxis = d3.axisLeft(yScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);;
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 0)
+				.attr("x", 0 - (h / 2))
+				.attr("dy", "1em")
+				.style("text-anchor", "middle")
+				.text("Hours Spent Coding per Night");
+			
+			//Creates the points on the graph and adds the tooltips about them
+			svg.selectAll("circle")
+				.data(coordinates)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) { 
+					return xScale(d[0]);
+				})
+				.attr("cy", function(d) {
+					return yScale(d[1]);
+				})
+				.attr("r", 5)
+				.on("mouseover", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 1);
+					tooltip.text("(" + d[0] + ", " + d[1] + ")")
+						.style("right", (d3.event.pageX -10) + "px")
+						.style("top", (d3.event.pageY - 50) + "px");
+				})
+				.on("mouseout", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 0);
+				});
+			
+			//Adds the mean, median, mode, and sd of the data
+			d3.select("body")
+				.append("p")
+				.html("# of Programmers in 10 Class:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(x) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(x));	
+			d3.select("body")
+				.append("p")
+				.html("Hours Spent Coding Per Night:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(y) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(y));
+		</script>
+	</BODY>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!--
+			Matthew Leiser
+			COSC 4500
+			Intro Tech Skills Demo
+			https://mleiser.github.io/5500-project/Leiser-Matthew-005896475.html
+			Done entirely in Vim
+	  	-->
+		<meta charset="utf-8">
+		<title>Intro Tech Skills Demo</title>
+		<script type="text/javascript" src="d3.js">
+		</script>
+	</head>
+	<BODY>
+		<script type="text/javascript">
+			var x = Array(10);
+			var y = Array(10);
+
+			var w = 500;
+			var h = 500;
+			var padding = 40;
+			
+			//Random Array Generator
+			var i;
+			for (i = 0; i < x.length; i++) {
+				x[i] = Math.round((Math.random() * 9) + 1);
+			}
+
+			for (i = 0; i < y.length; i++) {
+				y[i] = Math.round((Math.random() * 9) + 1);
+			}
+			
+			var coordinates = new Array();
+			
+			for (i = 0; i < x.length; i++) {
+				coordinates[i] = new Array(x[i], y[i]);	
+			}
+
+			//Calculates the Mean
+			function mean(numbers) {
+				var total = 0, i;
+				for (i = 0; i < numbers.length; i++) {
+					total += numbers[i];
+				}
+				return total / numbers.length;
+			}
+			
+	  		//Calculates the Median
+			function median(numbers) {
+				var median = 0; 
+				var numsLen = numbers.length;
+				numbers.sort();
+
+				if (numsLen % 2 === 0) {
+					median = (numbers[numsLen / 2 - 1] + numbers[numsLen /2]) / 2;
+				}
+
+				else {
+					median = numbers[(numsLen - 1) / 2];
+				}
+
+				return median;
+			}
+			
+			//Calculates the mode
+			function mode(numbers) {
+				var numMapping = {};
+				var greatestFreq = 0;
+				var mode;
+				numbers.forEach(function findMode(num) {
+					numMapping[num] = (numMapping[num] || 0) + 1;
+
+					if (greatestFreq < numMapping[num]) {
+						greatestFreq = numMapping[num];
+						mode = num;
+					}
+				});
+				return mode;
+			}
+			
+	  		//Calculates the standard deviation
+			function standardDeviation(numbers) {
+				var avg = mean(numbers);
+
+				var squareDiffs = numbers.map(function(value) {
+					var diff = value - avg;
+					var sqrDiff = diff * diff;
+					return sqrDiff;
+				});
+
+				var avgSquareDiff = mean(squareDiffs);
+
+				var stdDev = Math.sqrt(avgSquareDiff);
+
+				return stdDev;
+			}
+			
+			//Sets the svg dimensions
+			var svg = d3.select("body")
+					.append("svg")
+					.attr("width", w)
+					.attr("height", h);	
+					d3.select("body");
+			
+			var xScale = d3.scaleLinear().domain([0, 10]).range([padding, w - padding]);
+			var yScale = d3.scaleLinear().domain([0, 10]).range([h - padding, padding]);
+			
+			//Creates the tooltip shell
+			var tooltip = d3.select("body")
+					.append("div")
+					.attr("class", "tooltip")
+					.style("opacity", 0);
+			
+			//Creates and adds the xAxis
+			var xAxis = d3.axisBottom(xScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+	  		svg.append("g")
+				.attr("class", "axis")
+	  			.attr("transform", "translate(0," + (h - padding) + ")")
+	  			.call(xAxis);
+
+			svg.append("text")
+				.attr("transform", "translate(" + (w / 2) + " ," + (h - padding + 30) + ")")
+				.style("text-anchor", "middle")
+				.text("# of Programmers in 10 Classes");
+			
+			//Creates and adds the yAxis
+			var yAxis = d3.axisLeft(yScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);;
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 0)
+				.attr("x", 0 - (h / 2))
+				.attr("dy", "1em")
+				.style("text-anchor", "middle")
+				.text("Hours Spent Coding per Night");
+			
+			//Creates the points on the graph and adds the tooltips about them
+			svg.selectAll("circle")
+				.data(coordinates)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) { 
+					return xScale(d[0]);
+				})
+				.attr("cy", function(d) {
+					return yScale(d[1]);
+				})
+				.attr("r", 5)
+				.on("mouseover", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 1);
+					tooltip.text("(" + d[0] + ", " + d[1] + ")")
+						.style("right", (d3.event.pageX -10) + "px")
+						.style("top", (d3.event.pageY - 50) + "px");
+				})
+				.on("mouseout", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 0);
+				});
+			
+			//Adds the mean, median, mode, and sd of the data
+			d3.select("body")
+				.append("p")
+				.html("# of Programmers in 10 Class:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(x) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(x));	
+			d3.select("body")
+				.append("p")
+				.html("Hours Spent Coding Per Night:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(y) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(y));
+		</script>
+	</BODY>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!--
+			Matthew Leiser
+			COSC 4500
+			Intro Tech Skills Demo
+			https://mleiser.github.io/5500-project/Leiser-Matthew-005896475.html
+			Done entirely in Vim
+	  	-->
+		<meta charset="utf-8">
+		<title>Intro Tech Skills Demo</title>
+		<script type="text/javascript" src="d3.js">
+		</script>
+	</head>
+	<BODY>
+		<script type="text/javascript">
+			var x = Array(10);
+			var y = Array(10);
+
+			var w = 500;
+			var h = 500;
+			var padding = 40;
+			
+			//Random Array Generator
+			var i;
+			for (i = 0; i < x.length; i++) {
+				x[i] = Math.round((Math.random() * 9) + 1);
+			}
+
+			for (i = 0; i < y.length; i++) {
+				y[i] = Math.round((Math.random() * 9) + 1);
+			}
+			
+			var coordinates = new Array();
+			
+			for (i = 0; i < x.length; i++) {
+				coordinates[i] = new Array(x[i], y[i]);	
+			}
+
+			//Calculates the Mean
+			function mean(numbers) {
+				var total = 0, i;
+				for (i = 0; i < numbers.length; i++) {
+					total += numbers[i];
+				}
+				return total / numbers.length;
+			}
+			
+	  		//Calculates the Median
+			function median(numbers) {
+				var median = 0; 
+				var numsLen = numbers.length;
+				numbers.sort();
+
+				if (numsLen % 2 === 0) {
+					median = (numbers[numsLen / 2 - 1] + numbers[numsLen /2]) / 2;
+				}
+
+				else {
+					median = numbers[(numsLen - 1) / 2];
+				}
+
+				return median;
+			}
+			
+			//Calculates the mode
+			function mode(numbers) {
+				var numMapping = {};
+				var greatestFreq = 0;
+				var mode;
+				numbers.forEach(function findMode(num) {
+					numMapping[num] = (numMapping[num] || 0) + 1;
+
+					if (greatestFreq < numMapping[num]) {
+						greatestFreq = numMapping[num];
+						mode = num;
+					}
+				});
+				return mode;
+			}
+			
+	  		//Calculates the standard deviation
+			function standardDeviation(numbers) {
+				var avg = mean(numbers);
+
+				var squareDiffs = numbers.map(function(value) {
+					var diff = value - avg;
+					var sqrDiff = diff * diff;
+					return sqrDiff;
+				});
+
+				var avgSquareDiff = mean(squareDiffs);
+
+				var stdDev = Math.sqrt(avgSquareDiff);
+
+				return stdDev;
+			}
+			
+			//Sets the svg dimensions
+			var svg = d3.select("body")
+					.append("svg")
+					.attr("width", w)
+					.attr("height", h);	
+					d3.select("body");
+			
+			var xScale = d3.scaleLinear().domain([0, 10]).range([padding, w - padding]);
+			var yScale = d3.scaleLinear().domain([0, 10]).range([h - padding, padding]);
+			
+			//Creates the tooltip shell
+			var tooltip = d3.select("body")
+					.append("div")
+					.attr("class", "tooltip")
+					.style("opacity", 0);
+			
+			//Creates and adds the xAxis
+			var xAxis = d3.axisBottom(xScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+	  		svg.append("g")
+				.attr("class", "axis")
+	  			.attr("transform", "translate(0," + (h - padding) + ")")
+	  			.call(xAxis);
+
+			svg.append("text")
+				.attr("transform", "translate(" + (w / 2) + " ," + (h - padding + 30) + ")")
+				.style("text-anchor", "middle")
+				.text("# of Programmers in 10 Classes");
+			
+			//Creates and adds the yAxis
+			var yAxis = d3.axisLeft(yScale)
+	  				.tickValues([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);;
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 0)
+				.attr("x", 0 - (h / 2))
+				.attr("dy", "1em")
+				.style("text-anchor", "middle")
+				.text("Hours Spent Coding per Night");
+			
+			//Creates the points on the graph and adds the tooltips about them
+			svg.selectAll("circle")
+				.data(coordinates)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) { 
+					return xScale(d[0]);
+				})
+				.attr("cy", function(d) {
+					return yScale(d[1]);
+				})
+				.attr("r", 5)
+				.on("mouseover", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 1);
+					tooltip.text("(" + d[0] + ", " + d[1] + ")")
+						.style("right", (d3.event.pageX -10) + "px")
+						.style("top", (d3.event.pageY - 50) + "px");
+				})
+				.on("mouseout", function(d) {
+					tooltip.transition()
+						.duration(1)
+						.style("opacity", 0);
+				});
+			
+			//Adds the mean, median, mode, and sd of the data
+			d3.select("body")
+				.append("p")
+				.html("# of Programmers in 10 Class:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(x) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(x) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(x));	
+			d3.select("body")
+				.append("p")
+				.html("Hours Spent Coding Per Night:" + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Mean: " + mean(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"Median: " + median(y) + "<br/>" + "<span style='padding-left:3em'>" +
+					"Mode: " + mode(y) + "<br/>" + "<span style='padding-left:3em'>" + 
+					"SD: " + standardDeviation(y));
+		</script>
+	</BODY>
+</html>
