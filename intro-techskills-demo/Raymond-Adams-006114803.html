@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<head>
+    <title>The d3 test</title>
+    <style>
+        .chart {
+
+}
+
+.main text {
+    font: 10px sans-serif;	
+}
+
+.axis line, .axis path {
+    shape-rendering: crispEdges;
+    stroke: black;
+    fill: none;
+}
+
+circle {
+    fill: steelblue;
+}
+
+.dot {
+            stroke: none;
+        }
+.tooltip {
+    position: absolute;
+    visibility: hidden;
+        }
+
+
+
+</style>
+    <script type="text/javascript" src="https://d3js.org/d3.v3.js"></script>
+</head>
+
+<body>
+    <div class='content'>
+        <!-- /the chart goes here -->
+    </div>
+    <h1>Finding the mean, median, mode, and standard deviation</h1>
+    <script type="text/javascript">
+
+        let sum1 = 0, sum2 = 0;
+
+
+        var arr1 = [];
+        var arr2 = [];
+        for (var i = 0, t = 10; i < t; i++) {
+            arr1.push(Math.round(Math.random() * t))
+            arr2.push(Math.round(Math.random() * t))
+            sum1 += arr1[i];
+            sum2 += arr2[i];
+        }
+        const mean1 = sum1 / 10;
+        const mean2 = sum2 / 10;
+
+
+        function dataPoints(array1, array2) {
+            var array = [];
+            for (var i = 0, t = 10; i < t; i++) {
+                array.push([array1[i], array2[i]]);
+
+            }
+            return array;
+        }
+        var data = dataPoints(arr1, arr2);
+
+
+        //Print the two arrays
+        console.log("Array 1: ", arr1);
+        console.log("Array 2: ", arr2);
+        console.log(dataPoints(arr1, arr2))
+
+
+
+
+
+        //Function to calculate the mean of two arrays
+        function median(arr1, arr2) {
+
+            var median1 = 0, median2 = 0;
+            var arr1Length = arr1.length, arr2Length = arr2.length;
+
+            arr1.sort();
+            arr2.sort();
+            console.log(arr1);
+            console.log(arr2);
+
+            //Finding the median for arr1
+            if (arr1Length % 2 == 0) {
+                // average of two middle numbers
+                median1 = (arr1[arr1Length / 2 - 1] + arr1[arr1Length / 2]) / 2;
+            } else { // is odd
+                // middle number only
+                median1 = arr1[(arr1Length - 1) / 2];
+            }
+
+            //Finding the median for arr2
+            if (arr2Length % 2 == 0) {
+                // average of two middle numbers
+                median2 = (arr2[arr2Length / 2 - 1] + arr2[arr2Length / 2]) / 2;
+            } else { // is odd
+                // middle number only
+                median2 = arr2[(arr2Length - 1) / 2];
+            }
+
+            return (`Median of array 1: ${median1}<br>Median of array 2: ${median2}<br>`);
+        }
+
+
+        //Function to calculate the mode of two arrays
+        function mode(array1, array2) {
+            // as result can be bimodal or multi-modal,
+            // the returned result is provided as an array
+            // mode of [3, 5, 4, 4, 1, 1, 2, 3] = [1, 3, 4]
+            var modes1 = [], modes2 = [];
+            var count1 = [], count2 = [];
+            var num;
+            var maxIndex = 0;
+
+            for (var i = 0; i < array1.length; i += 1) {
+                num = arr1[i];
+                count1[num] = (count1[num] || 0) + 1;
+                if (count1[num] > maxIndex) {
+                    maxIndex = count1[num];
+                }
+            }
+
+            for (i in count1)
+                if (count1.hasOwnProperty(i)) {
+                    if (count1[i] == maxIndex) {
+                        modes1.push(Number(i));
+                    }
+                }
+
+
+
+            for (var j = 0; j < array2.length; j += 1) {
+                num = arr2[j];
+                count2[num] = (count2[num] || 0) + 1;
+                if (count2[num] > maxIndex) {
+                    maxIndex = count2[num];
+                }
+            }
+
+            for (j in count2)
+                if (count2.hasOwnProperty(j)) {
+                    if (count2[j] == maxIndex) {
+                        modes2.push(Number(j));
+                    }
+                }
+
+            return (`Mode of array 1: ${modes1}<br>Mode of array 2: ${modes2}<br>`);
+        }
+
+        //Function to calculate the standard deviation of two arrays
+        function standardDev1(array1) {
+            let m1 = mean1;
+
+
+            return Math.sqrt(array1.reduce(function (sq, n) {
+                return sq + Math.pow(n - m1, 2);
+            }, 0) / (array1.length - 1));
+
+
+        }
+
+
+        //Function to calculate the standard deviation of two arrays
+        function standardDev2(array2) {
+            let m2 = mean2;
+
+
+
+            return Math.sqrt(array2.reduce(function (sq, n) {
+                return sq + Math.pow(n - m2, 2);
+            }, 0) / (array2.length - 1));
+
+        }
+
+
+        /*
+        //Print the two arrays
+        console.log("Array 1: ", arr1);
+        console.log("Array 2: ", arr2);
+        
+        //Print the mean of arr1 & arr2
+        console.log(`Mean of array 1: ${mean1}` );
+        console.log(`Mean of array 2: ${mean2}` );
+        //Print the median of arr1 & arr2
+        console.log(median(arr1, arr2));
+        //Print the mode of arry1 & arr2
+        console.log(mode(arr1, arr2));
+        
+        console.log(`Standard deviation of array 1: ${standardDev1(arr1)} \nStandard deviation of array 2: ${standardDev2(arr2)}`);
+        */
+
+        //Print the two arrays
+        document.write("Array 1: ", arr1, "<br>");
+        document.write("Array 2: ", arr2, "<br>");
+
+        //Print the mean of arr1 & arr2
+        document.write(`Mean of array 1: ${mean1} <br>`);
+        document.write(`Mean of array 2: ${mean2} <br>`);
+        //Print the median of arr1 & arr2
+        document.write(median(arr1, arr2));
+        //Print the mode of arry1 & arr2
+        document.write(mode(arr1, arr2));
+
+        document.write(`Standard deviation of array 1: ${standardDev1(arr1)}<br>Standard deviation of array 2: ${standardDev2(arr2)}<br>`);
+
+
+
+
+        document.write()
+
+        var margin = { top: 20, right: 15, bottom: 60, left: 60 }
+            , width = 960 - margin.left - margin.right
+            , height = 500 - margin.top - margin.bottom;
+
+        var x = d3.scale.linear()
+            .domain([0, d3.max(data, function (d) { return d[0]; })])
+            .range([0, width]);
+
+        var y = d3.scale.linear()
+            .domain([0, d3.max(data, function (d) { return d[1]; })])
+            .range([height, 0]);
+
+
+        var chart = d3.select('body')
+            .append('svg:svg')
+            .attr('width', width + margin.right + margin.left)
+            .attr('height', height + margin.top + margin.bottom)
+            .attr('class', 'chart')
+
+        var main = chart.append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('class', 'main')
+
+        // draw the x axis
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient('bottom');
+
+
+        main.append('g')
+            .attr('transform', 'translate(0,' + height + ')')
+            .attr('class', 'main axis date')
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("Play Off Games");
+
+        // draw the y axis
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient('left');
+
+        main.append('g')
+            .attr('transform', 'translate(0,0)')
+            .attr('class', 'main axis date')
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Home Runs");
+
+        var g = main.append("svg:g");
+
+       var tooltip = d3.selectAll("body").append("div")
+           .attr("class", "tooltip").text("HEllo");
+
+        g.selectAll("scatter-dots")
+            .data(data)
+            .enter().append("svg:circle")
+            .attr("cx", function (d, i) { return x(d[0]); })
+            .attr("cy", function (d) { return y(d[1]); })
+            .attr("r", 8)
+            .on("mouseover", function (d) {
+                console.log("mouseover")
+                tooltip
+                .style("visibility", "visible")
+                .style("top",  event.pageY - 20 + "px")
+                .style("left",  event.pageX + 10 + "px")
+                tooltip.text(d[0] + ", " + d[1])
+
+
+            })
+            .on("mouseout", function () {
+                tooltip.style("visibility", "hidden")
+            });
+    </script>
+</body>
+
+</html>
