@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<!-- Hosted: https://cmorley191.github.io/intro-techskills-demo/Morley-Charlie-006021980.html -->
+
+<html>
+<head>
+	<title>Morley, Charlie - 006021980</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<script type="text/javascript">
+    if (window.location.hostname != "cmorley191.github.io") {
+        document.write('<a href="https://cmorley191.github.io/intro-techskills-demo/Morley-Charlie-006021980.html">GitHub Pages Host</a>');
+    }
+</script>
+
+<h1>Charlie Morley's Advanced Data Science Intro Project </h1>
+
+<body>
+	<script type="text/javascript">
+		// DATA
+        var generateData = function() {
+            return d3.range(10).map(function() {
+                return Math.floor(Math.random() * 10.0) + 1;
+            });
+        }
+		var data1 = generateData(), data2 = generateData();
+
+		console.log(data1);
+        console.log(data2);
+
+
+        // STATISTICS
+        var columns = ['Statistic', 'X-Axis', 'Y-Axis'];
+        var statistics = [
+            ['Mean', function(data) { return d3.mean(data) }],
+            ['Median', function(data) { return d3.median(data) }],
+            ['Mode', function(data) {
+                var frequencies = d3.set(data).values()
+                    .map(function(value) { return [value, data.filter(function(x) { return x == value; }).length] });
+                console.log(frequencies);
+                return frequencies.sort(function(x, y) { return x[1] - y[1]; }).reverse()[0][0];
+            }],
+            ['Stddev', function(data) { return Number(d3.deviation(data)).toFixed(2) }],
+        ].map(function(stat) {
+            return [stat[0]].concat([data1, data2].map(stat[1]));
+        });
+
+        // TABLE
+        var table = d3.select('body').append('table')
+            .attr('style', 'margin-left: 50px; border-collapse: collapse;')
+        var thead = table.append('thead');
+        var tbody = table.append('tbody').attr('style', 'border: 1px solid black;');
+
+        thead.append('tr')
+            .selectAll('th')
+            .data(columns).enter()
+            .append('th')
+            .attr('style', 'border: 1px solid black;')
+            .text(function(column) { return column; });
+
+        var rows = tbody.selectAll('tr')
+            .data(statistics).enter()
+            .append('tr');
+
+        var cells = rows.selectAll('td')
+            .data(function(row) {
+                return columns.map(function(column) {
+                    return {column: column, value: row[columns.indexOf(column)]};
+                });
+            }).enter()
+            .append('td')
+            .attr('style', 'border: 1px solid black;')
+            .html(function(d) { return d.value; });    
+
+
+        // PLOT (guided by http://bl.ocks.org/weiglemc/6185069)
+        var data = d3.zip(data1,data2);
+
+        var margin = {top: 50, right: 50, bottom: 50, left: 50},
+            width = 500 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        // setup x 
+        var xScale = d3.scale.linear().range([0, width]).domain([0,10]);
+        var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+        // setup y
+        var yScale = d3.scale.linear().range([height, 0]).domain([0,10]);
+        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+        // add the graph canvas to the body of the webpage
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // add the tooltip area to the webpage
+        var tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // x-axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width / 2)
+            .attr("y", 40)
+            .style("text-anchor", "middle")
+            .text("Number of times subject drinks alcohol per month");
+
+        // y-axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(90)")
+            .attr("x", height / 2)
+            .attr("y", 40)
+            .style("text-anchor", "middle")
+            .text("Number of times subject is late for appointments per month");
+
+        // draw dots
+        svg.selectAll(".dot")
+            .data(data).enter()
+            .append("circle")
+            .attr("class", "dot")
+            .attr("r", 3.5)
+            .attr("cx", function(d) { return xScale(d[0]); })
+            .attr("cy", function(d) { return yScale(d[1]); })
+            .on("mouseover", function(d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html("(" + d[0] + ", " + d[1] + ")")
+                    .style('font-size', '24px');
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", 0);
+            });
+	</script>
+</body>
+</html>

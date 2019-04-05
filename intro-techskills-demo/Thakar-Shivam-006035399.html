@@ -1,0 +1,222 @@
+<html>
+    <meta charset = "utf-8">
+
+    <!-- Author: Shivam Thakrar
+         Webpage link: https://goldendrummer730.github.io
+    -->
+    <style>
+    .tooltip {
+      position: absolute;
+      width: 200px;
+      height: 28px;
+      pointer-events: none;
+    }
+
+    h1 {
+      text-align: center;
+      color: blue;
+      text-decoration: underline;
+    }
+
+    h2 {
+      text-decoration: underline;
+    }
+
+    body {
+      background-image: url("https://webgradients.com/public/webgradients_png/047%20Fly%20High.png");
+    }
+
+    td, th {
+      padding: 1px 4px;
+    }
+
+    </style>
+
+
+    <body>
+
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script>
+
+
+          // Since there is no built in mode function, we need to build one-->
+            // Function sampled from 'https://stackoverflow.com/questions/1053843/get-the-element-with-the-highest-occurrence-in-an-array'
+            function mode(array) {
+                var mode = 0;
+                var modeMapping = {};
+                            
+                var maxElement = array[0];
+                var maxCount = 1;
+                
+                if(array.length == 0) return null;
+
+                for(var i = 0; i < array.length; i++)
+                {
+                    var curr = array[i];
+                    if(modeMapping[curr] == null)
+                        modeMapping[curr] = 1;
+                    else
+                        modeMapping[curr]++;  
+                    if(modeMapping[curr] > maxCount)
+                    {
+                        maxElement = curr;
+                        maxCount = modeMapping[curr];
+                    }
+                }
+                return maxElement;
+            }
+
+            // A super quick toString for an array
+            function toString(array) {
+                var val = '[';
+                
+                for(let i = 0; i < array.length; i++){
+                    val = val + array[i] + ", ";
+                }
+                var res = val.substring(0, val.length - 2);
+                return res + ']';
+            }
+
+           // 1. Using Javascript/D3, create 2 arrays of random, count data within the domain (1-10). Sample size of each array should be 10.
+
+            var xdata = d3.range(10).map(function() {
+                return Math.floor(Math.random() * 10);
+            });
+            var ydata = d3.range(10).map(function() {
+                return Math.floor(Math.random() * 10);
+            });
+            
+            //Combine the 2 arrays into a 2D array
+            var combinedData = [];
+            for(let i = 0; i < xdata.length; i++){
+                combinedData.push({x: xdata[i], y: ydata[i]});
+            }
+           
+            // Display the arrays
+            var arrDisplay = d3.select("body").append("div");
+            arrDisplay.append("h1").text("Skills Demo");
+            arrDisplay.append("h2").text("Data Points:");
+            
+            
+            arrDisplay.append("p").text('X-Array: ' + toString(xdata));
+            arrDisplay.append("p").text('Y-Array: ' + toString(ydata));
+            //arrDisplay.append("p").text(toString(combinedData));
+
+            // 2. Calculate mean, median, mode, standard deviation of each array and print them on the html with formatting.
+        
+
+            var centralTen = [
+                  {"Mean": d3.mean(xdata), "Median" : d3.median(xdata), "Mode" : mode(xdata), "Standard Deviation" : d3.deviation(xdata).toFixed(2)},
+                  {"Mean": d3.mean(ydata), "Median" : d3.median(ydata), "Mode" : mode(ydata), "Standard Deviation" : d3.deviation(ydata).toFixed(2)}
+                             ];
+            
+            //Table code sampled from: http://bl.ocks.org/AMDS/4a61497182b8fcb05906
+            var colTitles = ["Mean", "Median", "Mode", "Standard Deviation"];
+            var rowTitles = ["# of Pizzas Eaten", "# of Soda Cans Drank"];
+
+            var centralDisp = d3.select("body").append("div");
+            //Display central tendencies here:
+            var table = centralDisp.append("table");
+            var thead = table.append("thead");
+            var tbody = table.append("tbody");
+
+            //Make the header row
+            thead.append("tr")
+              .selectAll("th")
+              .data(colTitles).enter()
+              .append("th")
+              .text(function(col) { return col; });
+
+            var rows = tbody.selectAll("tr")
+              .data(centralTen)
+              .enter()
+              .append("tr");
+
+            var cells = rows.selectAll("td")
+              .data(function (row) {
+                return colTitles.map(function (column) {
+                  return {column: column, value: row[column]}
+                });
+              })
+              .enter()
+              .append("td")
+              .text(function (d) { return d.value; });
+
+
+            
+            // 3. Use these two arrays to define a x-axis and y-axis
+            // Canvas sampled from http://bl.ocks.org/weiglemc/6185069
+            
+            //Need to set up the canvas dimensions
+            var margin = {top: 20, right: 20, bottom: 30, left: 40};
+            var width = 960 - margin.left - margin.right;
+            var height = 530 - margin.top - margin.bottom;
+            
+            var xScale = d3.scaleLinear().domain([0, 10]).range([0, width]);
+            var yScale = d3.scaleLinear().domain([0, 10]).range([height,0]);
+            
+            // adding graph canvas
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .attr("width", width)
+                .attr("height", height);
+
+            //Axes
+            var xAxis = d3.axisBottom(xScale);
+            var yAxis = d3.axisLeft(yScale);
+            
+            // add the tooltip area to the webpage
+            var tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+            
+              // x-axis
+            svg.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+            svg.append("text")
+              .attr("transform", "translate(" + (width/2) + " ," + (height + 30) + ")")
+              .attr("class", "label")
+              .style("text-anchor", "middle")
+              .text("# of Pizzas Eaten");
+
+          // y-axis
+            svg.append("g")
+              .call(yAxis);
+            svg.append("text")
+              .attr("class", "label")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 0-margin.left)
+              .attr("x", 0-(height/2))
+              .attr("dy", "1em")
+              .style("text-anchor", "middle")
+              .text("# of Soda Cans Drank");
+            
+          //draw the points on the graph
+            svg.selectAll("scatter-dots")
+            .data(combinedData)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) { return xScale(d.x); })
+            .attr("cy", function(d) { return yScale(d.y); })
+            .attr("r", 7)
+            .style("fill", "green")
+            .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(350)
+                       .style("opacity", .9);
+                  tooltip.html("("+ d.x + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
+        </script>
+    </body>
+</html>

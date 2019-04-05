@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	//https://reidholben.github.io/cosc4500-advdatascience-sp19/intro-techskills-demo/Holben-Reid-006117123.html
+    <head>
+        <meta charset="utf-8">
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+    </head>
+    <body>
+        <table id="valuetable"></table>
+        <script type="text/javascript">
+            function ranArray(Size, min, max) {
+  		return new Array(Size).fill(0).map(function(n) {
+    		return Math.random() * (max - min) + min;
+  			});
+				}
+
+	A=ranArray(10,1,10);
+	B=ranArray(10,1,10);
+
+	function mode(array)
+		{
+    	var map = []
+   	var max = array[0]
+    	var maxCount = 1
+    	for(var i = 0; i < array.length; i++)
+    	{
+        	var d = array[i]
+        	if(map[d] == null)
+        {
+            map[d] = 1
+        }
+        else
+        {
+            map[d]++
+        }
+        if(map[d] > maxCount)
+        {
+            max = d
+            maxCount = map[d]
+        }
+    }
+    return max
+}
+	
+	titles = ["Array Numbers", "Mean", "Median", "Mode", "Standard Deviation"];
+	Ainfo = [A, d3.mean(A), d3.median(A), mode(A), d3.deviation(A)];
+	Binfo = [B, d3.mean(B), d3.median(B), mode(B), d3.deviation(B)];
+
+	for(var i = 0; i < titles.length; i++)
+	{
+    		var row = d3.select("#valuetable").append("tr")
+    		row.append("th").text(titles[i])
+    		row.append("td").text(Ainfo[i])
+    		row.append("td").text(Binfo[i])
+    		console.log(titles[i])
+    		console.log(Ainfo[i])
+    		console.log(Binfo[i])
+	}
+	var margin = {top: 25, right: 25, bottom: 70, left: 70}
+	var width = 500 - margin.left - margin.right
+	var height = 500 - margin.top - margin.bottom;
+	var xlabels = d3.scaleLinear().domain([0, d3.max(A)]).range([0, width])
+	var ylabels = d3.scaleLinear().domain([0, d3.max(B)]).range([height, 0])
+
+	var chart = d3.select("body").append("svg:svg").attr("width", width + margin.right + margin.left).attr("height", height + margin.top + margin.bottom)
+	var main = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").attr("width", width).attr("height", height).attr("class", "main")
+
+	var sideaxis = d3.axisLeft(ylabels)
+	main.append("g").attr("transform", "translate(0,0)").attr("class", "main axis date").call(sideaxis)
+	var bottomaxis = d3.axisBottom(xlabels)
+	main.append("g").attr("transform", "translate(0," + height + ")").attr("class", "main axis date").call(bottomaxis)
+
+	var total = new Array(10)
+	for(var i = 0; i < 10; i++)
+	{
+    		total[i] = [A[i], B[i]]
+	}
+
+	var graph = main.append("svg:g")
+	var div = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
+	var grphpts = graph.selectAll("scatter-dots").data(total).enter().append("svg:circle").attr("cx", function(d,i) {
+    	return xlabels(d[0])
+}).attr("cy", function(d) {
+    return ylabels(d[1])
+}).attr("r", 8)
+
+	grphpts.on("mouseover", function(d) {
+    		div.transition().duration(50).style("opacity", "0.9")
+    		div.html("(" + d[0] + "," + d[1] + ")")
+	}).on("mouseout", function(d) {
+    		div.transition().duration(50).style("opacity", 0)
+	})
+
+	main.append("g").attr("transform", "translate(0," + height + ")").call(d3.axisBottom(xlabels))
+	main.append("text").attr("transform", "translate(" + (width/2) + " ," + (height + 	margin.top + 20) + ")").style("text-anchor", "middle").text("Saves Per Game")
+	main.append("g").call(d3.axisLeft(ylabels))
+	main.append("text").attr("transform", "rotate(-90)").attr("ylabels", 0 - margin.left).attr("xlabels", 0 - (height/2)).attr("dy", "1em").style("text-anchor", "middle").text("Goals Per Game")
+
+        </script>
+    </body>
+</html>     
